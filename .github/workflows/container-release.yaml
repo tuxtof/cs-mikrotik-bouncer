@@ -51,7 +51,7 @@ jobs:
           LABELS: ${{ steps.meta.outputs.labels }}
           PLATFORMS: linux/amd64,linux/arm64,linux/arm
         run: |
-          PTAGS = `echo $TAGS | sed 's/ghcr.io\/tuxtof\/cs-mikrotik-bouncer://g'`
+          PTAGS=`echo $TAGS | sed 's/ghcr.io\/tuxtof\/cs-mikrotik-bouncer://g'`
           echo $PTAGS
           ko build -B --image-label "$LABELS" -t $PTAGS --platform=$PLATFORMS .
 
