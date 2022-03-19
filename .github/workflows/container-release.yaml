@@ -1,7 +1,7 @@
 name: build and publish container
 
 on:
-  # push:
+  push:
   #   tags:
   #     - 'v*'
   # pull_request:
