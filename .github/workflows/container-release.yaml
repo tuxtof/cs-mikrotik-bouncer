@@ -2,11 +2,11 @@ name: build and publish container
 
 on:
   push:
-  #   tags:
-  #     - 'v*'
-  # pull_request:
-  #   branches:
-  #     - 'master'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - 'master'
 
 env:
   IMAGE_NAME: ${{ github.repository }}
