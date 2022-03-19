@@ -25,6 +25,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ghcr.io/${{ env.IMAGE_NAME }}
+          sep-tags: ","
+          sep-labels: ","
           tags: |
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
