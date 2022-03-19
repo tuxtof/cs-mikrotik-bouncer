@@ -44,7 +44,7 @@ jobs:
         env:
           KO_DOCKER_REPO: ghcr.io/${{ env.IMAGE_NAME }}
         run: |
-          ko -B .
+          ko build -B .
 
       # - name: Build and push
       #   id: docker_build
