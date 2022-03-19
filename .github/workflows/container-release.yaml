@@ -24,6 +24,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
+          images: container
           # images: ghcr.io/${{ env.IMAGE_NAME }}
           sep-tags: ","
           sep-labels: ","
