@@ -38,13 +38,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - uses: imjasonh/setup-ko@v0.4
+      - name: Install ko 
+        uses: imjasonh/setup-ko@v0.4
 
       - name: Build and Push with ko
         env:
           KO_DOCKER_REPO: ghcr.io/${{ env.IMAGE_NAME }}
         run: |
-          ko build -B .
+          ko build -B --platform=linux/amd64,linux/arm64,linux/arm .
 
       # - name: Build and push
       #   id: docker_build
