@@ -53,7 +53,7 @@ jobs:
           ESSAI: ${{ github.event.head_commit.timestamp }}
         run: |
           PTAGS=`echo $TAGS | sed 's/cs-mikrotik-bouncer://g'`
-          export SOURCE_DATE_EPOCH=$(git log -1 --format='%ct')
+          export SOURCE_DATE_EPOCH=$(date +%s)
           git log -1 --format='%ct'
           ko build -B --image-label "$LABELS" -t $PTAGS --platform=$PLATFORMS .
 
