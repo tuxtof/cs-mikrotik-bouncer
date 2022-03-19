@@ -44,10 +44,11 @@ jobs:
       - name: Build and Push with ko
         env:
           KO_DOCKER_REPO: ghcr.io/${{ env.IMAGE_NAME }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+          LABELS: ${{ steps.meta.outputs.labels }}
+          PLATFORMS: linux/amd64,linux/arm64,linux/arm
         run: |
-          echo ${{ steps.meta.outputs.tags }}
-          echo ${{ steps.meta.outputs.labels }}
-          ko build -B --platform=linux/amd64,linux/arm64,linux/arm .
+          ko build -B --platform=$PLATFORMS .
 
       # - name: Build and push
       #   id: docker_build
