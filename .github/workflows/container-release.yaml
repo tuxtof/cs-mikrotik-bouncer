@@ -54,7 +54,7 @@ jobs:
         run: |
           PTAGS=`echo $TAGS | sed 's/container://g'`
           echo $PTAGS
-          ko build -B --image-label "org.opencontainers.image.description=A CrowdSec bouncer for MikroTik RouterOS" -t $PTAGS --platform=$PLATFORMS .
+          ko build -B --image-label "$LABELS" -t $PTAGS --platform=$PLATFORMS .
 
       # - name: Build and push
       #   id: docker_build
