@@ -50,9 +50,11 @@ jobs:
           TAGS: ${{ steps.meta.outputs.tags }}
           LABELS: ${{ steps.meta.outputs.labels }}
           PLATFORMS: linux/amd64,linux/arm64,linux/arm
+          ESSAI: ${{ github.event.head_commit.message }}
         run: |
           PTAGS=`echo $TAGS | sed 's/cs-mikrotik-bouncer://g'`
           export KO_DATA_DATE_EPOCH=$(git log -1 --format='%ct')
+          git log -1 --format='%ct'
           ko build -B --image-label "$LABELS" -t $PTAGS --platform=$PLATFORMS .
 
       # - name: Build and push
