@@ -41,7 +41,7 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
-            # type=sha
+
       
       - name: Build and Push with ko
         env:
