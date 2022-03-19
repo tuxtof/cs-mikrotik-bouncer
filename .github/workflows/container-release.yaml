@@ -24,8 +24,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: container
-          # images: ghcr.io/${{ env.IMAGE_NAME }}
+          images: cs-mikrotik-bouncer
           sep-tags: ","
           sep-labels: ","
           tags: |
@@ -33,7 +32,7 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
             type=sha
-            type=raw,foo
+            type=raw,bar
       
       - name: Login to GHCR
         uses: docker/login-action@v1
@@ -52,8 +51,8 @@ jobs:
           LABELS: ${{ steps.meta.outputs.labels }}
           PLATFORMS: linux/amd64,linux/arm64,linux/arm
         run: |
-          PTAGS=`echo $TAGS | sed 's/container://g'`
-          echo $PTAGS
+          PTAGS=`echo $TAGS | sed 's/cs-mikrotik-bouncer://g'`
+          export KO_DATA_DATE_EPOCH=$(git log -1 --format='%ct')
           ko build -B --image-label "$LABELS" -t $PTAGS --platform=$PLATFORMS .
 
       # - name: Build and push
