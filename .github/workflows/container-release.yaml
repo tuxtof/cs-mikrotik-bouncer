@@ -45,7 +45,6 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}
-            type=raw,foo
 
       
       - name: Build and Push to GHCR with ko
