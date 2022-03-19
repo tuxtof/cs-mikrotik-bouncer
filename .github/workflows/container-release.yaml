@@ -51,7 +51,7 @@ jobs:
           LABELS: ${{ steps.meta.outputs.labels }}
           PLATFORMS: linux/amd64,linux/arm64,linux/arm
         run: |
-          ko build -B -t $TAGS --platform=$PLATFORMS .
+          ko build -B --image-label "$LABELS" --platform=$PLATFORMS .
 
       # - name: Build and push
       #   id: docker_build
