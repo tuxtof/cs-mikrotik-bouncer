@@ -45,6 +45,8 @@ jobs:
         env:
           KO_DOCKER_REPO: ghcr.io/${{ env.IMAGE_NAME }}
         run: |
+          echo ${{ steps.meta.outputs.tags }}
+          echo ${{ steps.meta.outputs.labels }}
           ko build -B --platform=linux/amd64,linux/arm64,linux/arm .
 
       # - name: Build and push
