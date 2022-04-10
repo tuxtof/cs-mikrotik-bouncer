@@ -10,8 +10,6 @@ import (
 	"github.com/go-routeros/routeros"
 )
 
-var addrList = make(map[string]string)
-
 func dial() (*routeros.Client, error) {
 	if useTLS {
 		return routeros.DialTLS(mikrotikHost, username, password, nil)
@@ -19,7 +17,7 @@ func dial() (*routeros.Client, error) {
 	return routeros.Dial(mikrotikHost, username, password)
 }
 
-func initMikrotik() *routeros.Client {
+func (mal *mikrotikAddrList) initMikrotik() {
 
 	log.Info().Msg("Connecting to mikrotik")
 
@@ -32,6 +30,10 @@ func initMikrotik() *routeros.Client {
 		c.Async()
 	}
 
+	mal.c = c
+
+	mal.cache = make(map[string]string)
+
 	log.Print("mikrotik list addr")
 	initCmd := "/ip/firewall/address-list/print ?list=crowdsec =.proplist=.id,address"
 	r, err := c.RunArgs(strings.Split(initCmd, " "))
@@ -40,28 +42,27 @@ func initMikrotik() *routeros.Client {
 	}
 	log.Info().Msgf("fill %d entry in internal addrList\n", len(r.Re))
 	for _, v := range r.Re {
-		addrList[v.Map["address"]] = v.Map[".id"]
+		mal.cache[v.Map["address"]] = v.Map[".id"]
 	}
 
-	return c
 }
 
-func decisionProcess(streamDecision *models.DecisionsStreamResponse, c *routeros.Client) {
+func (mal *mikrotikAddrList) decisionProcess(streamDecision *models.DecisionsStreamResponse) {
 
 	for _, decision := range streamDecision.Deleted {
 		log.Info().Msgf("removed decisions: IP: %s | Scenario: %s | Duration: %s | Scope : %v", *decision.Value, *decision.Scenario, *decision.Duration, *decision.Scope)
 
-		if addrList[*decision.Value] != "" {
+		if mal.cache[*decision.Value] != "" {
 			log.Info().Msgf("Verify address %s in mikrotik", *decision.Value)
-			checkCmd := fmt.Sprintf("/ip/firewall/address-list/print =.proplist=address ?.id=%s", addrList[*decision.Value])
-			r, err := c.RunArgs(strings.Split(checkCmd, " "))
+			checkCmd := fmt.Sprintf("/ip/firewall/address-list/print =.proplist=address ?.id=%s", mal.cache[*decision.Value])
+			r, err := mal.c.RunArgs(strings.Split(checkCmd, " "))
 			if err != nil {
 				log.Fatal().Err(err).Msg("address-list search cmd failed")
 			}
 
 			if len(r.Re) == 1 && r.Re[0].Map["address"] == *decision.Value {
-				delCmd := fmt.Sprintf("/ip/firewall/address-list/remove =numbers=%s", addrList[*decision.Value])
-				_, err = c.RunArgs(strings.Split(delCmd, " "))
+				delCmd := fmt.Sprintf("/ip/firewall/address-list/remove =numbers=%s", mal.cache[*decision.Value])
+				_, err = mal.c.RunArgs(strings.Split(delCmd, " "))
 				if err != nil {
 					log.Error().Err(err).Msg("address-list remove cmd failed")
 				}
@@ -69,7 +70,7 @@ func decisionProcess(streamDecision *models.DecisionsStreamResponse, c *routeros
 			} else {
 				log.Info().Msgf("%s already removed from mikrotik", *decision.Value)
 			}
-			delete(addrList, *decision.Value)
+			delete(mal.cache, *decision.Value)
 
 		} else {
 			log.Info().Msgf("%s not find in local cache", *decision.Value)
@@ -81,14 +82,14 @@ func decisionProcess(streamDecision *models.DecisionsStreamResponse, c *routeros
 
 		addCmd := fmt.Sprintf("/ip/firewall/address-list/add#=list=crowdsec#=address=%s#=comment=%s#=timeout=%s", *decision.Value, *decision.Scenario, *decision.Duration)
 
-		if addrList[*decision.Value] != "" {
+		if mal.cache[*decision.Value] != "" {
 			log.Info().Msgf("Address %s already present", *decision.Value)
 		} else {
-			r, err := c.RunArgs(strings.Split(addCmd, "#"))
+			r, err := mal.c.RunArgs(strings.Split(addCmd, "#"))
 			if err != nil {
 				log.Error().Err(err).Msg("address-list add cmd failed")
 			} else {
-				addrList[*decision.Value] = r.Done.List[0].Value
+				mal.cache[*decision.Value] = r.Done.List[0].Value
 				log.Info().Msgf("Address %s blocked in mikrotik", *decision.Value)
 			}
 		}
